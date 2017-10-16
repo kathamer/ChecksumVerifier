@@ -1,53 +1,60 @@
 import hashlib  # Generate MD5 hashes
-import click    # Make beautiful command line interfaces
 
-__version__ = "0.2"
+__version__ = "0.1"
 
-"""Generate an MD5 hash"""
-def generateHash(data):
-    hash = hashlib.md5(data)
+supportedHashes = ["sha256", "md5"]
+
+def generateHash(data, hashtype):
+    if hashtype == "md5":
+        hash = hashlib.md5(data)
+    elif hashtype == "sha256":
+        hash = hashlib.sha256(data)
+    else:
+        raise ValueError
     return hash.hexdigest()
 
-"""Verify an MD5 checksum"""
-def verifyChecksum():
+def verifyChecksum(hashtype):
     filePath = input("Please enter the path of the file: ")
     checksum = input("Please enter the checksum of the file: ")
     try:
-        click.echo("Verifying checksum...")
+        print("Verifying checksum...")
         with open(filePath, "rb") as fileObject:
-            fileData = fileObject.read()  # Read binary data
-            generatedChecksum = generateHash(fileData)  # Generate an MD5 hash for the binary data
-            if generatedChecksum == checksum:  # If checksums match
-                click.secho("Checksum verified!", fg = "green")
-            else: 
-                click.secho("Checksum does not match!", fg = "red")
+            fileData = fileObject.read()
+            generatedChecksum = generateHash(fileData, hashtype)
+            if generatedChecksum == checksum:
+                print("Checksum verified")
+            else:
+                print("Checksum does not match!")
     except:
-        click.secho("There was an issue while verifying the checksum", fg = "red")
+        print("There was an issue while verifying the checksum")
 
-"""Generate an M55 checksum"""
-def generateChecksum():
+def generateChecksum(hashtype):
     filePath = input("Please enter the path of the file: ")
     try:
-        click.echo("Verifying checksum...")
+        print("Verifying checksum...")
         with open(filePath, "rb") as fileObject:
-            fileData = fileObject.read()  # Read binary data
-            checksum = generateHash(fileData)  # Generate an MD5 hash for binary data
-            click.echo("Checksum for file: " + click.style(filePath, fg = "green") + " is: " + click.style(checksum, fg = "green"))
+            fileData = fileObject.read()
+            checksum = generateHash(fileData, hashtype)
+            print("Checksum for file: "+filePath+ " is: "+checksum)
     except:
         print("There was an issue while generating the checksum")
 
-def main():
-    click.echo("ChecksumVerifier "+__version__)
-    while True:
-        click.echo("1. Generate checksum") 
-        click.echo("2. Verify checksum")
-        option = input("Please choose an option: ")
+print("ChecksumVerifier "+__version__)
+while True:
+    print("1. Generate checksum") 
+    print("2. Verify checksum")
+    option = input("Please choose an option: ")
+    for i, hashtype in enumerate(supportedHashes):
+        print(str(i + 1) + ". " + hashtype)
+    hashtype = input("Please choose a hash type: ")
+    if hashtype in supportedHashes:
         if option == "1":
-            generateChecksum()
+            generateChecksum(hashtype)
         elif option == "2":
-            verifyChecksum()
+            verifyChecksum(hashtype)
         else:
-            click.echo("Please choose a valid option")
-        
-if __name__ == "__main__":
-    main()    
+            print("Please choose a valid option")
+    else:
+        print("Unsupported hashtype!")
+
+    
